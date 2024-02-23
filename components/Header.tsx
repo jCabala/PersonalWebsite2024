@@ -12,9 +12,11 @@ const Header = () => {
       <div>
         <Link href="/" aria-label={siteMetadata.headerTitle}>
           <div className="flex items-center justify-between">
-            <div className="mr-3">
-              <Logo />
-            </div>
+              {/* <div className="mr-3">
+                <Logo />
+                </div> */}
+              {/* If you want a logo add a data/logo.svg file and uncomment this tag
+              and the import above */}
             {typeof siteMetadata.headerTitle === 'string' ? (
               <div className="hidden h-6 text-2xl font-semibold sm:block">
                 {siteMetadata.headerTitle}
