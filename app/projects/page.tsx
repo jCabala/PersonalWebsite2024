@@ -12,23 +12,31 @@ export default function Projects() {
           <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
             Projects
           </h1>
-          <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
-            Showcase your projects with a hero image (16 x 9)
-          </p>
+          {projectsData.map((group) => (
+            <ProjectGroupSection group={group} />
+          ))}
         </div>
-        <div className="container py-12">
-          <div className="-m-4 flex flex-wrap">
-            {projectsData.map((d) => (
-              <Card
-                key={d.title}
-                title={d.title}
-                description={d.description}
-                imgSrc={d.imgSrc}
-                href={d.href}
-              />
-            ))}
-          </div>
-        </div>
+        <div className="container py-12"></div>
+      </div>
+    </>
+  )
+}
+
+function ProjectGroupSection({ group }) {
+  return (
+    <>
+      <h3 className="center pb-2 pt-4 text-3xl font-bold leading-8 tracking-tight">{group.name}</h3>
+      <div className="-m-4 flex flex-wrap">
+        <br />
+        {group.projects.map((d) => (
+          <Card
+            key={d.title}
+            title={d.title}
+            description={d.description}
+            imgSrc={d.imgSrc}
+            href={d.href}
+          />
+        ))}
       </div>
     </>
   )
