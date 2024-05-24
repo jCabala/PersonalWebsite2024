@@ -36,7 +36,7 @@ const workProjects: ProjectGroup = {
   projects: [
     {
       title: 'OnetWatch',
-      description: `At Ringier Axel Springer Poland, I contributed to the Onet Watch project, a vertical video player for the mobile version of the Onet web app. I was involved from the project's inception through to its deployment. My primary contribution was redesigning the use of Intersection Observers, which significantly enhanced the application's performance.`,
+      description: `At Ringier Axel Springer Poland, I contributed to the Onet Watch project, a vertical video player for the mobile version of the Onet web app. I was involved from the project's inception through to its deployment. My primary contribution was redesigning the use of Intersection Observers, which significantly enhanced the application's performance. Note that the project is meant for mobile devices. The link will redirect you to different content on desktop.`,
       imgSrc: '/static/images/projects/OnetWatch.jpg',
       href: 'https://www.onet.pl/watch?src=bottomBarOnet',
     },
@@ -56,6 +56,6 @@ const openSourceProjects: ProjectGroup = {
   ],
 }
 
-const projectsData: ProjectGroup[] = [workProjects, universityProjects, openSourceProjects]
+const projectsData: ProjectGroup[] = [universityProjects, workProjects, openSourceProjects]
 
 export default projectsData
