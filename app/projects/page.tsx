@@ -13,7 +13,7 @@ export default function Projects() {
             Projects
           </h1>
           {projectsData.map((group) => (
-            <ProjectGroupSection group={group} />
+            <ProjectGroupSection key={group.name} group={group} />
           ))}
         </div>
         <div className="container py-12"></div>
