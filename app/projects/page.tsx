@@ -26,8 +26,8 @@ function ProjectGroupSection({ group }) {
   return (
     <>
       <h3 className="center pt-4 text-3xl font-bold leading-8 tracking-tight">{group.name}</h3>
+      {group.description && <p>{group.description}</p>}
       <div className="-m-4 flex flex-wrap">
-        <br />
         {group.projects.map((d) => (
           <Card
             key={d.title}
