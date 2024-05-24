@@ -26,7 +26,7 @@ const universityProjects: ProjectGroup = {
       description: `What if you could look up any information in the world? Webpages, images, videos
     and more. Google has many features to help you find exactly what you're looking
     for.`,
-      imgSrc: '/static/images/pintos.jpg',
+      imgSrc: '/static/images/wacc.jpg',
       href: 'https://www.doc.ic.ac.uk/~mjw03/OSLab/pintos.pdf',
     },
   ],
