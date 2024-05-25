@@ -13,7 +13,7 @@ const siteMetadata = {
   mastodon: '',
   email: 'kuba.cabala6@gmail.com',
   github: 'https://github.com/jCabala',
-  twitter: '',
+  x: '',
   facebook: '',
   youtube: '',
   linkedin: 'https://www.linkedin.com/in/jcabala/',
