@@ -1,0 +1,146 @@
+---
+title: 'Understand RSA - part 1'
+date: '2024-06-07'
+tags: ['methematics', 'number theory', 'algorithms', 'cryptography', 'rsa']
+draft: false
+summary: 'Explaining the RSA algorithm and mathematical foundations needed to understand how it works.'
+images: []
+---
+## Introduction
+RSA, introduced by Ron **R**ivest, Adi **S**hamir, and Leonard **A**dleman in [this paper](https://dl.acm.org/doi/pdf/10.1145/359340.359342), is a well-known algorithm for secure data transmission. It's straightforward, requiring minimal mathematical knowledge to understand its workings and a bit more to grasp its principles. In this series, I will discuss both and explain all necessary mathematical concepts along the way. Anyone with foundational mathematical knowledge can follow along.
+
+
+RSA, like most encryption schemes, consists of 2 functions:
+1. The encryption function which uses an encryption key to produce a ciphertext from the message.
+2. The decryption function that utilizes the decryption key to recover the original message from the encrypted text
+
+(A key is a secret used to encrypt/decrypt the data). 
+
+RSA is an example of an **asymmetric key encryption algorithm** in which the encryption key (also called a **public key**) differs from the decryption key (called a **private key**). 
+
+## Mathematics
+To understand the encryption and decryption functions as well as the key generation process one needs to understand a few notions from number theory.
+
+### Divisors
+We say that a number a is a divisor of b if a divides b. We denote this relation as a|b. Examples:
+```
+2|4
+5|125
+7|7
+```
+Note that, although the symbol is symmetric the relation is clearly not e.g. 5 divides 10 but not the other way around.
+
+### Prime numbers
+A number is prime if it has **exactly two divisors:** 1 and itself. Examples of prime numbers are 2, 3, 5, 31, 1000003. Note that 1 is not a prime number as it has only one divisor.
+
+### Greatest common divisor
+A number g is referred to as the greatest common divisor of `a` and `b` (abbreviated as `gcd(a,b)`) if it is the largest number that divides both a and b. Examples:
+
+```
+gcd(6, 12) = 6
+gcd(6, 9) = 3
+gcd(100, 52) = 2
+```
+If `gcd(a, b) = 1` we say that a and b are coprime. 
+Example: 13 and 24 are coprime.
+
+### Modular arithmetic
+Modular arithmetic is a system of arithmetic for integers, where two integers are considered equal if they have the same remainder when divided by some fixed number (called the modulus). In this system:
+ a (mod  n) represents the remainder when a is divided by n. So, for example, `5 (mod 3) is 2`, and `7 (mod 6) is 1`
+Two numbers are considered equivalent (congruent) under a modulus n if they have the same remainder when divided by n. This is written as `a ≡ b(modn)`.
+For example: 
+```
+7 ≡ 12 (mod 5) as 7 = 1 * 5 + 2 and 12 = 2 * 5 + 2
+6  ≡ 0 (mod 6) as 6 = 1 * 6 + 0
+5 + 2 ≡ 1 (mod 6)
+3 * 4 ≡ 0 (mod 12)
+
+```
+You can think of modular arithmetic as moving around the circle by some fixed angle as illustrated in the picture below (The picture illustrates arithmetics modulo 7):
+
+![Modular arithmetics example](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJVYqkzwTLBulgRyedmoAppYwiNEFNsHlT5Q&s)
+<font size="2">(Source: https://www.ias.edu/ideas/2012/taylor-modular-arithmetic)</font>
+
+Below I list two useful properties of numbers congruent modulo n:
+1. If `a ≡ b (mod n)` then `n | a - b`
+2. If `a ≡ b (mod n)` then there exists a (not necessarily positive) number `k` such that `a = k * n + b`
+3. If `0 < a < n then a (mod n)` is just `a`
+
+That's all of the math needed to understand the implementation of RSA.
+
+## The algorithm
+The algorithm consists of three parts which include key generation as well as encryption and decryption functions.
+
+### Key generation
+To generate both keys follow the steps below:
+1. Pick two prime numbers `p` and `q` and let `N = p * q`
+2. Choose a number `e > 1` such that `gcd(e, (p-1)(q-1)) = 1`
+3. Find a number `d` such that `e * d ≡ 1 (mod (p-1)(q-1))`
+
+Then the keys can be represented as tuples:
+```
+public_key = (e, N)
+private_key = (d, N)
+```
+### Decryption and encryption
+The decryption and encryption functions are given by:
+```
+enc(public_key, x) = x^e (mod N)
+dec(private_key, y) =  y^d (mod N)
+```
+
+The algorithm ensures that `dec(private_key enc(public_key, x)) ≡ x (mod N)`. 
+We would be more interested in encrypting text than numbers; however, this doesn't require additional work. Every character is represented as a number so if we choose `N` that is bigger than the highest number that can represent a character we get that `dec(private_key enc(public_key, x)) = x`. 
+
+## Simple implementation
+Below I present the simplest implementation of the RSA algorithm in Python (it differs from the one presented in the original paper and works efficiently only with small prime numbers):
+```python
+from math import gcd
+
+def key_gen(p, q):
+    n = p * q
+    phi = (p - 1) * (q - 1)
+    e = 2
+    while gcd(e, phi) != 1:
+        e += 1
+    d = 2
+    while (d * e) % phi != 1:
+        d += 1
+    return {'public_key': (e, n), 'private_key': (d, n)}
+
+# 3rd argument of the pow() function is the modulus
+# https://www.w3schools.com/python/ref_func_pow.asp
+def encrypt(public_key, message):
+    e, n = public_key
+    return [pow(ord(c), e, n) for c in message]
+
+def decrypt(private_key, cipher_text):
+    d, n = private_key
+    return ''.join([chr(pow(c, d, n)) for c in cipher_text])
+
+def main():
+    p = 47
+    q = 59
+
+    keys = key_gen(p, q)
+    print("private_key: ", keys['private_key']) # private_key:  (1779, 2773)
+    print("public_key: ", keys['public_key']) # public_key:  (3, 2773)
+    
+    message = "Hello, World!"
+    print("Encrypted message: ", encrypt(keys['public_key'], message))
+    # Encrypted message:  [1666, 1518, 770, 770, 542, 1994, 2265, 1302, 542, 762, 770, 1720, 2661]
+    
+    print("Decrypted message: ", decrypt(keys['private_key'], encrypt(keys['public_key'], message)))
+    # Decrypted message:  Hello, World!
+    
+if __name__ == '__main__':
+    main()    
+```
+
+## Conclusion
+We've explored the basics of RSA, including key generation, encryption, and decryption, along with the necessary number theory. This foundation helps us understand how RSA secures communication through asymmetric key encryption.
+In the next posts, we will prove the correctness of the algorithm, explore the original implementation from the RSA paper, and discuss its security, explaining all necessary mathematics along the way. Stay tuned for a deeper dive into the workings of RSA.
+
+
+ 
+
