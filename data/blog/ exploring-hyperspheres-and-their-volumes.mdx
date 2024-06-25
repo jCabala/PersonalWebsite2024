@@ -1,0 +1,168 @@
+---
+title: 'Exploring hyperspheres and their volumes'
+date: '2024-06-07'
+tags: ['methematics', 'geometry', 'algorithms', 'Monte Carlo']
+draft: false
+summary: 'Dive into the fascinating world of hyperspheres as we extend the familiar concepts of circles and spheres to higher dimensions, unraveling their intricate volume formulas and verifying them with the Monte Carlo method, blending mathematical elegance with computational experimentation.'
+images:
+  [
+    /static/images/blog/hyperspheres/monte-carlo-results.png,
+    /static/images/blog/hyperspheres/1-sphere.png,
+    /static/images/blog/hyperspheres/2-sphere.png,
+    /static/images/blog/hyperspheres/3-sphere.png,
+  ]
+---
+
+# Introduction
+
+Circles and spheres are familiar geometric shapes, and the equations governing their areas and volumes are equally well-known. The area of a circle is $A = \pi r^2$, and the volume of a sphere is $V = \frac{4}{3} \pi r^3$. We were taught these formulas through years of education. But what happens when we extend these concepts to higher dimensions?
+
+Do the elegant equations for the area of a circle and the volume of a sphere generalize to higher dimensions? What does it mean to consider a sphere in four, five, or even more dimensions? And if these equations do generalize, how can we verify their accuracy?
+
+In this blog post, we will try to answer the questions above. We will derive the formula for the volume of a hypersphere and explore its implications. Furthermore, we will use the Monte Carlo method to verify our derived equation, combining mathematical rigor and computational experimentation.
+
+For the most part, only basic mathematical knowledge is required to understand the concepts discussed; however, the section on the `Volume of a hypersphere` is a bit more involved and requires knowledge of concepts from multivariable calculus.
+
+## What is a Hypersphere?
+
+A hypersphere is the generalization of a sphere to more than three dimensions. While we live in a 3D world, mathematics allows us to explore shapes and concepts in higher dimensions.
+
+So what do we mean by a sphere in $n$ dimensions? To understand that, let's revisit "spheres" in familiar dimensions.
+
+In 1D, a sphere is given by two points, equidistant from a given point (the center).
+![1-sphere](/static/images/blog/hyperspheres/1-sphere.png)
+
+In 2D, the sphere is just a circle which again is a set of points equidistant from the center.
+![2-sphere](/static/images/blog/hyperspheres/2-sphere.png)
+
+In 3D, the sphere is, well, just a sphere and, you guessed it, all points on the sphere are equidistant from the center.
+![3-sphere](/static/images/blog/hyperspheres/3-sphere.png)
+
+So following this logic, an $n$-dimensional sphere is just a set of points equidistant from the center.
+
+But how do we calculate the distance in $n$ dimensions? This notion generalizes nicely from lower dimensions. Each $n$-dimensional point is represented by $n$ coordinates. For example, $(2, 1)$, $(3, 4)$ are 2D points, and $(1, 2, 3)$ is a 3D point. Let $d(x, y)$ represent the distance between two points. Then we have:
+
+1. In 1D, $x$ and $y$ both have 1 coordinate and
+   $d(x, y) = |x - y| = \sqrt{(x - y)^2}$
+1. In 2D, $x = (x_1, x_2)$ and $y = (y_1, y_2)$ are points with 2 coordinates each and
+   $d(x, y) = \sqrt{(x_1 - y_1)^2 + (x_2 - y_2)^2}$
+1. In 3D, $x = (x_1, x_2, x_3)$ and $y = (y_1, y_2, y_3)$ are points with 3 coordinates each and
+   $d(x, y) = \sqrt{(x_1 - y_1)^2 + (x_2 - y_2)^2 + (x_3 - y_3)^2}$
+
+In general, in $n$ dimensions, $x$ and $y$ are points with $n$ coordinates each, $x = (x_1, x_2, \ldots, x_n)$ and $y = (y_1, y_2, \ldots, y_n)$, and the distance between them is given by
+$d(x, y) = \sqrt{(x_1 - y_1)^2 + (x_2 - y_2)^2 + \cdots + (x_n - y_n)^2}$
+
+Now by putting everything together, we have that a hypersphere in $n$ dimensions (an $n$-sphere) can be described using the equation:
+$d(x, c) = r$
+where $x = (x_1, x_2, \ldots, x_n)$ is a point on the hypersphere, $c = (c_1, c_2, \ldots, c_n)$ is the center of the hypersphere, and $r$ is its radius. This equation states that the distance between any point $x$ on the hypersphere and the center $c$ equals the radius $r$.
+
+## Volume of a Hypersphere
+
+To derive the volume of a hypersphere, we begin by understanding the integral representation of the volume in different dimensions. In lower dimensions, we have intuitive notions of length, area, and volume. For example, the length of a line segment, the area of a circle, and the volume of a sphere are all concepts we can easily visualize. However, as we move to higher dimensions, our intuition fades, and we must rely on more abstract mathematical tools to make sense of these concepts.
+To make things easier let's consider spheres centered at the origin denoted by $O = (0, 0, 0, ..., 0)$.
+
+In $n$ dimensions, we generalize the notion of volume using integrals. Consider a hypersphere of radius $R$ in
+$n$ dimensions. The volume can be represented as an integral over all coordinates $x_{1}, x_{2}, ..., xn$ within the hypersphere:
+$$ Vol (B*{n}(R)) = \int\int ... \int*{B*{n}(R)}dx*{1}dx*{2}...dx*{n}$$
+where $B_{n}(R)=\{ x \in \mathbb{R}^n: d(x, O) \leq R \}$ which is a hypersphere and it's inside called an `n-ball`.
+
+You can check yourself that solving this integral yields familiar equations in 1 and 2 dimensions:
+$$Vol(B_{1}(R)) = 2R$$ and $$Vol(B_{2}(R)) = \pi R^2$$
+
+Now we can derive a recursive relation between volumes in higher dimensions and volumes in lower ones. More specifically,
+we will prove that for all $n > 2$ we have $$Vol(B_{n}(R)) = \frac{2\pi R^2} {n} Vol(B_{n-2}(R))$$ $(*)$.
+
+First, we will prove a useful fact. Namely that
+
+$$Vol(B_{n}(R)) = v_{n}R^n$$ $(**)$
+
+where $v_{n}$ is a volume of a unit ball in $n$ dimensions (ball with radius $1$). The proof goes like this:
+
+$$Vol(B_{n}(R)) = \int\int ... \int_{B_{n}(R)}dx_{1}dx_{2}...dx_{n} = \int\int ... \int_{\sum_{i=1}^{i=n}x_{i}^2 \leq R}dx_{1}dx_{2}...dx_{n}$$
+
+Now we use a change of varialbes $$u_{i} = \frac{x_{i}}{n}$$ and calculate the Jacobian $|J| = R^n$. We now get that:
+
+$$Vol(B_{n}(R)) = \int\int ... \int_{\sum_{i=1}^{i=n}u_{i}^2 \leq 1}R^ndu_{1}du_{2}...du_{n} = R^n\int\int ... \int_{\sum_{i=1}^{i=n}u_{i}^2 \leq 1}du_{1}du_{2}...du_{n} = R^nv_{n}$$ $$\Box$$
+
+Now we are ready to prove $(*)$. By $(**)$ it is enough to show that $$v_{n} = \frac{2\pi}{n} v_{n-2}$$.
+Here is the proof:
+
+$$v_{n} = \int\int ... \int_{\sum_{i=1}^{i=n}x_{i}^2 \leq 1}dx_{1}dx_{2}...dx_{n} \\ = \int\int_{x_{1}^2 + x_{2}^2 \leq 1}(\int ... \int_{\sum_{i=3}^{i=n}x_{i}^2 \leq 1 - x_{1}^2 - x_{2}^2}dx_{3} ... dx_{n})dx_{1}dx_{2} \\ = \int\int_{x_{1}^2 + x_{2}^2 \leq 1} Vol(B_{n-2}(\sqrt{1 - x_{1}^2 - x_{2}^2}))dx_{1}dx_{2} \\ = \int\int_{x_{1}^2 + x_{2}^2 \leq 1} v_{n-2} (1 - x_{1}^2 - x_{2}^2)^{\frac{n-2}{2}}$$ by $(**)$
+
+Now we are going to change to polar coordinates and get
+
+$$v_{n} = \int_{0}^{2\pi}\int_{0}^1 v_{n-2} r (1 - r^2)^{\frac{n-2}{2}} d\theta dr \\ = 2\pi v_{n-2}\int_{0}^1r (1 - r^2)^{\frac{n-2}{2}}dr \\ = \pi v_{n-2}\int_{0}^1 u^{\frac{n-2}{2}} du \\ = \frac{2\pi}{n}v_{n-2}$$ where $u = 1 - r^2$ ${\Box}$
+
+To sum up, we proved that volumes of hyperspheres follow a nice recursive formula
+$$Vol(B_{n}(R)) = \frac{2\pi R^2} {n} Vol(B_{n-2}(R))$$
+which allows us to calculate the volumes in higher dimensions easily.
+
+Using our formula we get the:
+
+1. $$Vol(B_{3}(R)) = \frac{4\pi}{3}R^2$$ as expected
+2. $$Vol(B_{4}(R)) = \frac{\pi^2}{2} R^3$$
+3. $$Vol(B_{5}(R)) = \frac{8\pi^2}{15} R^5$$. Dimension 5 is quite special as the 5-dimensional unit ball has the [biggest volume](https://math.stackexchange.com/questions/15656/volumes-of-n-balls-what-is-so-special-about-n-5).
+
+Is there any way we can "convince ourselves" that the above result is true?
+
+## Monte Carlo Verification
+
+We can employ the Monte Carlo method to verify the volumes of hyperspheres calculated using our theoretical formula. This method involves generating random points within a hypercube that circumscribes the hypersphere and determining the proportion of these points that lie within the hypersphere. By leveraging the law of large numbers, we can approximate the volume of the hypersphere with high accuracy.
+
+### Monte Carlo Method Explained
+
+The Monte Carlo method is a computational algorithm that relies on repeated random sampling to obtain numerical results. It is particularly useful for estimating complex integrals and in this case, the volume of high-dimensional shapes. Here’s how we can apply it to our problem:
+
+Generate Random Points: Generate a large number of random points uniformly distributed within the hypercube $$[-1, 1]^n$$. This hypercube contains the unit hypersphere we are interested in.
+
+2. Determine Points Inside the Hypersphere: Calculate the distance of each point from the origin using the Euclidean norm (the $d(x, y)$ function we derived before). Points whose distance from the origin is less than or equal to 1 are inside the unit hypersphere.
+
+3. Estimate Volume: The ratio of points inside the hypersphere to the total number of points, multiplied by the volume of the hypercube, gives an estimate of the hypersphere’s volume. The volume of an $n$
+   n-dimensional hypercube $$[-1, 1]^n$$ is $$2^n$$ because each dimension contributes a length of 2 (from $-1$ to $1$ ) and the total volume is the product of these lengths (I think it intuitively makes sense given the equations for an area of a square and a volume of a cube).
+
+### Python Implementation
+
+Below is the Python code implementing the Monte Carlo method to estimate the volume of unit hyperspheres in different dimensions. It also includes the theoretical volume calculation based on our recursive formula.
+
+```python
+import numpy as np
+
+def monte_carlo_unit_sphere_volume(dim, num_points=1000000):
+    # Generate random points in the hypercube [-1, 1]^dim
+ points = np.random.uniform(low=-1.0, high=1.0, size=(num_points, dim))
+   
+    # Count how many points are inside the unit sphere
+ distances = np.linalg.norm(points, axis=1)
+ inside_sphere = np.sum(distances <= 1.0)
+   
+    # The volume of the hypercube [-1, 1]^dim is 2^dim
+ hypercube_volume = 2 ** dim
+   
+    # The ratio of points inside the sphere to total points, multiplied by the hypercube volume
+ sphere_volume_estimate = (inside_sphere / num_points) * hypercube_volume
+   
+    return sphere_volume_estimate
+
+def theoretical_sphere_volume(dim, radius):
+    if (dim == 0): return 1.0
+    if (dim == 1): return 2.0 * radius
+
+    return 2 * np.pi * radius * theoretical_sphere_volume(dim - 2, radius) / dim
+
+
+# Example usage:
+for dim in range(1, 10):
+ estimated_volume = monte_carlo_unit_sphere_volume(dim)
+ theoretical_volume = theoretical_sphere_volume(dim, 1)
+    print(f"(Dimension, estimated volume, theoretical volume): {dim}, {estimated_volume}, {theoretical_volume}")
+```
+
+Running this code resulted in the following:
+![Results](/static/images/blog/hyperspheres/monte-carlo-results.png)
+
+## Conclusion
+
+Running this code for dimensions 1 through 9, we can compare the Monte Carlo estimated volumes with the theoretical volumes from our recursive formula. The close match between these results validates our mathematical derivations and demonstrates the effectiveness of computational methods in exploring higher-dimensional geometry. This blend of theory and computation enhances our understanding of higher-dimensional concepts and their interconnectedness.
+
+If you are interested in this topic
+I recommend going through [this article by Jake Gipple](https://scholar.rose-hulman.edu/cgi/viewcontent.cgi?article=1064&context=rhumj).
