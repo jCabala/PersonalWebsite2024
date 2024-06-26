@@ -6,12 +6,15 @@ draft: false
 summary: 'Dive into the fascinating world of hyperspheres as we extend the familiar concepts of circles and spheres to higher dimensions, unraveling their intricate volume formulas and verifying them with the Monte Carlo method, blending mathematical elegance with computational experimentation.'
 images:
   [
+    /static/images/blog/hyperspheres/intro.png,
     /static/images/blog/hyperspheres/monte-carlo-results.png,
     /static/images/blog/hyperspheres/1-sphere.png,
     /static/images/blog/hyperspheres/2-sphere.png,
     /static/images/blog/hyperspheres/3-sphere.png,
   ]
 ---
+
+![Hypersphere](/static/images/blog/hyperspheres/intro.png)
 
 # Introduction
 
@@ -70,7 +73,9 @@ You can check yourself that solving this integral yields familiar equations in 1
 $$Vol(B_{1}(R)) = 2R$$ and $$Vol(B_{2}(R)) = \pi R^2$$.
 
 Now we can derive a recursive relation between volumes in higher dimensions and volumes in lower ones. More specifically,
-we will prove that for all $n > 2$ we have $$Vol(B_{n}(R)) = \frac{2\pi R^2} {n} Vol(B_{n-2}(R))$$ $(*)$.
+we will prove that for all $n > 2$ we have
+
+$$Vol(B_{n}(R)) = \frac{2\pi R^2} {n} Vol(B_{n-2}(R))$$ $(*)$.
 
 First, we will prove a useful fact. Namely that
 
@@ -97,7 +102,7 @@ To sum up, we proved that volumes of hyperspheres follow a nice recursive formul
 $$Vol(B_{n}(R)) = \frac{2\pi R^2} {n} Vol(B_{n-2}(R))$$
 which allows us to calculate the volumes in higher dimensions easily.
 
-Using our formula we get the:
+Using our formula we get that:
 
 1. $$Vol(B_{3}(R)) = \frac{4\pi}{3}R^2$$ as expected
 2. $$Vol(B_{4}(R)) = \frac{\pi^2}{2} R^3$$
@@ -113,10 +118,8 @@ We can employ the Monte Carlo method to verify the volumes of hyperspheres calcu
 
 The Monte Carlo method is a computational algorithm that relies on repeated random sampling to obtain numerical results. It is particularly useful for estimating complex integrals and in this case, the volume of high-dimensional shapes. Here’s how we can apply it to our problem:
 
-Generate Random Points: Generate a large number of random points uniformly distributed within the hypercube $$[-1, 1]^n$$. This hypercube contains the unit hypersphere we are interested in.
-
+1. Generate Random Points: Generate a large number of random points uniformly distributed within the hypercube $$[-1, 1]^n$$. This hypercube contains the unit hypersphere we are interested in.
 2. Determine Points Inside the Hypersphere: Calculate the distance of each point from the origin using the Euclidean norm (the $d(x, y)$ function we derived before). Points whose distance from the origin is less than or equal to 1 are inside the unit hypersphere.
-
 3. Estimate Volume: The ratio of points inside the hypersphere to the total number of points, multiplied by the volume of the hypercube, gives an estimate of the hypersphere’s volume. The volume of an $n$
    n-dimensional hypercube $$[-1, 1]^n$$ is $$2^n$$ because each dimension contributes a length of 2 (from $-1$ to $1$ ) and the total volume is the product of these lengths (I think it intuitively makes sense given the equations for an area of a square and a volume of a cube).
 
