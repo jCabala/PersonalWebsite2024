@@ -1,0 +1,162 @@
+---
+title: 'Formal conversations with the data'
+date: '2024-08-05'
+tags: ['SQL', 'Databases', 'Relational Algebra']
+draft: false
+summary: 'Go on a journey through the elegant world of relational algebra, revealing how its fundamental operations can transform SQL queries into a powerful tool for mastering database magic.'
+images: [/static/images/blog/relational-algebra/formal-conversations.jpg]
+---
+
+![Formal conversations with the data ](/static/images/blog/relational-algebra/formal-conversations.jpg)
+<font size="2" style={{position: "relative", bottom: 25}}>Source: https://www.fotor.com/</font>
+
+
+# Introduction
+
+If you’ve ever worked with databases, you’ve probably encountered SQL. It’s a user-friendly query language that efficiently manages data in a database. However, I often find myself revisiting its syntax to refresh my memory. Recently, while doing so, I wondered, “Is there a way to abstract the properties of this language into a mathematical system, so I can write some Greek letters and make it look cool?” It turns out there is, and it’s quite interesting. This system is called relational algebra. It allows you to express database operations formally, and in this blog post, we will explore how it does that. To follow along one needs only a basic knowledge of SQL and relational databases.
+
+# What is relational algebra?
+
+Relational algebra is a system introduced by Edgar F. Codd as a way to provide the theory behind relational databases. It allows one to reason about this model without binding oneself to a particular query language.
+The main object relational algebra works with is, you guessed it, relations which are just data tables.
+
+| id  | name              | age | year_of_study | major            |
+| --- | ----------------- | --- | ------------- | ---------------- |
+| 1   | Anthony Rodriguez | 21  | 2             | Chemistry        |
+| 2   | Connie Maggie     | 23  | 4             | Computer Science |
+| 3   | Tiffany Miller    | 19  | 1             | Biology          |
+
+It provides a set of operations that allow manipulation and retrieval of data stored in those tables. The nice thing about it is that it consists only of six fundamental operations and the rest can be represented in terms of them. Let's see what they are.
+
+# Set theory operations
+
+The first two basic operations are well-known from set theory: union (SYMBOL) and difference (SYMBOL). I believe that their work requires no further explanation. It is worth noting that for those two operations to make sense, the tables have to have the same columns (same data type, names, and numbers).
+
+Another basic operation that can also be found in set theory is a Cartesian product. This is an operation of taking all possible ordered pairs of elements from two sets (tables in our case) and is denoted by `X`. More formally:
+$A \times B=\{(a,b)∣a \in A and b \in B\}$
+
+How do those operations manifest themselves in SQL? The keyword `UNION` performs a union operation and the keyword `EXCEPT` performs a difference operation, as demonstrated in the query below:
+
+```SQL
+SELECT customer_name FROM sales_db.sales_records
+UNION
+SELECT customer_name FROM marketing_db.campaign_responses
+UNION
+SELECT customer_name FROM support_db.support_tickets
+EXCEPT
+SELECT sr.customer_name FROM sales_db.sales_records sr
+JOIN support_db.support_tickets st ON sr.customer_name = st.customer_name;
+```
+
+The cartesian product operation is implemented by a `CROSS JOIN`:
+
+```SQL
+SELECT e.employee_id, e.name AS employee_name, d.department_id, d.department_name
+FROM employees e
+CROSS JOIN departments d;
+```
+
+# Other fundamental operations
+
+We already used `SELECT` in the examples above and now have to make sense of it in our system. To do that we have to introduce the selection operator. It's denoted in the following way: $\sigma_{formula}(table)$
+
+In theory, it is a unary operator, but it can also be considered a binary operator that takes a formula and a table, returning all rows that satisfy the formula. Note that the returned rows form a table. For example, this SQL query:
+
+```SQL
+SELECT *
+FROM employees
+WHERE department = 'Sales';
+```
+
+would be translated to: $\sigma_{department = Sales}(employees)$
+
+However, we don't always need all the data from each row. Sometimes, we only want specific parts, such as the name of a student or the price of a grocery item. This is where the projection operator comes in. It takes in a table and returns only the specified attributes. It's denoted as: $\pi_{attributes}(table)$. Now, we can translate a slightly modified version of the previous query:
+
+```SQL
+SELECT name, age
+FROM employees
+WHERE department = 'Sales';
+```
+
+It becomes: $\pi_{name, age}(\sigma_{department = Sales}(employees))$
+
+That is almost all of the basic operators in relational algebra. There is just one more called **rename**, which does exactly what the name suggests, so we will leave it as is.  
+
+The beautiful part is that it is enough! Using only the couple of operators we introduced, we can create many more complicated ones. One example that we are going to look at is a `JOIN` operation.
+
+# Join operation
+To translate a `JOIN` operation from SQL into relational algebra, we need to understand the underlying mechanism of this operation. The join operation combines rows from two tables based on a specified condition. In relational algebra, there are several types of joins. Let's see what they are and how we can express them in terms of fundamental operations.
+
+## Natural Join
+The natural join combines two relations by equating all attributes with the same name and projecting one of each pair of duplicate columns. It is denoted by the symbol $\bowtie$.
+
+Let's break down a natural join of 2 relations `R` and `S` ($R \bowtie S$)in terms of basic operations. 
+1. Cartesian Product: First, create a Cartesian product of `R` and `S`.
+
+2. Selection: Then, apply a selection condition where all common attributes are equal.
+
+3. Projection: Finally, project only the necessary attributes, excluding duplicate columns.
+
+For example, given the relations:
+
+**Employees Table**
+
+| EmployeeID | EmployeeName | DepartmentID |
+|------------|--------------|--------------|
+| 1          | Alice        | 101          |
+| 2          | Bob          | 102          |
+| 3          | Charlie      | 101          |
+| 4          | David        | 103          |
+
+**Departments Table**
+
+| DepartmentID | DepartmentName |
+|--------------|----------------|
+| 101          | HR             |
+| 102          | IT             |
+| 103          | Finance        |
+| 104          | Marketing      |
+
+
+this query:
+```SQL
+SELECT Employees.EmployeeID, Employees.EmployeeName, Departments.DepartmentName
+FROM Employees
+NATURAL JOIN Departments;
+```
+translates to: $\pi_{EmployeeID,EmployeeName,DepartmentName}(\sigma_{Employees.DepartmentID=Departments.DepartmentID}(Employees \times Departments))$\\
+
+## Theta Join
+A theta join is a more general form that allows for a condition other than simple equality. It is represented by $\bowtie_{\theta}$​, where $\theta$ is the condition.
+In relational algebra, this is implemented as:
+1. **Cartesian product**
+2. **Selection** on condition $\theta$
+Thus, the relational algebra expression is:
+$R \bowtie_{\theta} S = \sigma_{\theta}(R \times S)$ where `R` and `S` are relations.
+
+For example, given the data from above, the following query:
+```SQL
+SELECT *
+FROM Employees
+JOIN Departments
+ON Employees.DepartmentID = Departments.DepartmentID
+AND Employees.EmployeeName = 'Alice';
+```
+translates to:
+$\sigma_{Employees.DepartmentID = Departments.DepartmentID \land Employees.EmployeeName = 'Alice'} \left( Employees \times Departments \right)$
+
+## Outer Joins
+Outer joins extend the idea of joins to include unmatched rows from one or both tables. There are three types:
+Left Outer Join: Includes all rows from the left table and matched rows from the right table. Unmatched rows from the left table will have `NULL` for columns from the right table.
+Right Outer Join: Includes all rows from the right table and matched rows from the left table. Unmatched rows from the right table will have `NULL` for columns from the left table.
+Full Outer Join: Includes all rows when there is a match in one of the tables. Unmatched rows will have `NULL` for the columns from the non-matching side.
+Expressing outer joins in basic relational algebra operations is complex, as relational algebra does not directly support `NULL` values or the idea of retaining unmatched rows. I'm not going to derive them in this article, but expressing them in terms of basic operations is possible.
+
+# Conclusion
+Relational algebra might seem abstract, but its practical applications in database management are significant. By mastering its fundamental operations, you gain a deeper understanding of SQL and the underlying mechanics of data manipulation. This knowledge not only enhances your ability to write efficient queries but also helps optimize and analyze data with precision.
+Next time you craft a SQL query, consider the relational algebra behind it. Understanding these core concepts transforms you from merely executing commands to skillfully navigating and shaping data, a valuable skill in today's data-driven world.
+
+References:
+1. https://en.wikipedia.org/wiki/Relational_algebra
+2. https://www.geeksforgeeks.org/introduction-of-relational-algebra-in-dbms/
+3. https://www.guru99.com/relational-algebra-dbms.html

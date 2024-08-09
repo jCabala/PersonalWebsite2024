@@ -1,9 +1,1 @@
-{
-  "methematics": 2,
-  "geometry": 1,
-  "algorithms": 2,
-  "monte-carlo": 1,
-  "number-theory": 1,
-  "cryptography": 1,
-  "rsa": 1
-}
+{"sql":1,"databases":1,"relational-algebra":1,"methematics":2,"geometry":1,"algorithms":2,"monte-carlo":1,"number-theory":1,"cryptography":1,"rsa":1}
