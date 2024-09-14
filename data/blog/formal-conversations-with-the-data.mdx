@@ -124,7 +124,7 @@ SELECT Employees.EmployeeID, Employees.EmployeeName, Departments.DepartmentName
 FROM Employees
 NATURAL JOIN Departments;
 ```
-translates to: $\pi_{EmployeeID,EmployeeName,DepartmentName}(\sigma_{Employees.DepartmentID=Departments.DepartmentID}(Employees \times Departments))$\\
+translates to: $$
 
 ## Theta Join
 A theta join is a more general form that allows for a condition other than simple equality. It is represented by $\bowtie_{\theta}$​, where $\theta$ is the condition.

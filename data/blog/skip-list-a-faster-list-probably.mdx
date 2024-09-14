@@ -1,0 +1,70 @@
+---
+title: 'Skip List - a faster list, probably...'
+date: '2024-09-14'
+tags: ['data structures', 'probability']
+draft: false
+summary: 'Explore how probability creates faster data structures.'
+images: [/static/images/blog/skip-list/skip-list-title-img.jpg]
+---
+
+![Skip List Visualization](/static/images/blog/skip-list/skip-list-title-img.jpg)
+
+# Introduction
+Data structures are efficient data organization formats whose main goals are usually the fast performance of some operations and efficient memory utilization. Examples of data structures include arrays, sets, queues, and stacks.
+
+A linked list is another example whose main advantage is storing data without needing a lot of consecutive memory while allowing for reasonably fast searches, insertions, and deletions. Each node of the linked list has a value stored at that node and a field that points to the next node in the list.
+![Linked List](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcST17Hghsd8V_RFoF1yvKgmxYbn3Y2t8cuUcw&s)
+<font size="2" style={{position: "relative", bottom: 25}}>Source: https://adacomputerscience.org/concepts/struct_linked_list</font>
+
+We access the values in the list by accessing the head (the first node) and going to the next node using the pointer.  Now, assume that the values in the list are integers sorted in ascending order. How many nodes on average do we have to visit to insert a new node while still preserving the order? We have to find a node where a value is less than the one we want to insert but the value stored in the next node is higher or equal. Assuming the list has $n$ elements, there are $n + 1$ possible places to perform the isnertion. Assuming each is equally probable then we get $\frac{n + 1} {2}$ on average.
+
+Can we do better than that? Yes! We can use the power of probability to reduce the average insertion time. The data structure that is going to help us is called a skip list.
+
+# How does it work?
+The idea behind a skip list is simple. Store multiple layers of linked lists. The bottom layer will contain all elements and the further to the top you go the fewer elements will be there. You can think of a skip list to look like in the picture below:
+![Skip List](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQUjhhKGVN0PFGXn7vpOddcjunrPcCiZnohY67-gdQSjZDIqFABFDT8bbfk4hdBVch7cc)
+<font size="2" style={{position: "relative", bottom: 25}}>Source: http://ccf.ee.ntu.edu.tw/~yen/courses/ds20F/chapter-sl.pdf</font>
+
+How do we decide which elements are "promoted" to the top layers? We flip a coin. If it is heads then we add the node to the next layer and flip again. We continue the process until we get the tails.
+
+One might notice that it would be highly inefficient in terms of memory to store multiple copies of the same linked list. Fortunately, that is not necessary. We can modify the list node structure to contain multiple pointers to other nodes representing the next nodes at each layer. 
+
+When we try to insert a new element, we start looking for an appropriate place at the top layer and then move down to the bottom layer. After we find a good spot at the bottom layer we propagate the element to the top using the coinflip as mentioned before.
+
+The easiest way to understand how insertion works is to see it. The visualization below does a great job of explaining the insertion process.
+
+![Skip List Insertion Animation](https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Skip_list_add_element-en.gif/600px-Skip_list_add_element-en.gif)
+<font size="2" style={{position: "relative", bottom: 25}}>Source: https://en.wikipedia.org/wiki/Skip_list</font>
+
+# How fast is this?
+Let's calculate the average number of nodes that we have to visit to insert a new value. Since the propagation to the top is randomized we might assume that it will require relatively few steps and don't include it in our calculations. So, the cost of the entire process boils down to finding the correct place in the bottom layer (which, similar to the linked list, means finding a node that has a smaller value but the next one has a bigger value).
+Let's assume we want to insert a value $X$. Let $S(i)$ be a random variable and denote the number of nodes that we have to visit at the first $i$ levels. Let's find an expected value of $S(i)$ (denoted by $E[S(i)]$). In order to do so, we can use a trick. Let's assume we found a correct place at the $i$th level and reverse time. Let's move one step back. What are the possible paths? We either came there from a level above or we continued from the same level. The coin flip decided which option it was. Let's assume that the coin flip has a probability of propagation equal to $p$ (usually we take $p = 1/2$). If we also assume that the list has infinitely many elements on the left (it is unrealistic but we will loosen it up in the moment) then we get that 
+$E[S(i)] = p(1 + E[S(i-1)]) + (1 - p)(1 + E[S(i)])$
+which implies that
+$E[S(i)] = 1/p + E[S(i-1)] = 1/p + 1/p + E[S(i-2)] = ... = i/p$
+
+Now we just need the expected number of levels in the list. Let $L(i)$ be another random variable representing the number of nodes at ith level. 
+$E[L(1)] = n$ as every node has to be present at the first level.
+$E[L(2)] = n \cdot p$ because each node from level one is propagated with a probability of $p$.
+$E[L(3)] = n \cdot p^2$ for the same reason as on the previous level.
+Can you see the pattern? The number of elements will be p times less at each level. Then we get:
+$E[L(log_{1/p}(n) + 1)] = \frac {n} {p^{log_p(n)}} = 1$.
+This must be our expected final level! Thus, the expected number of levels is
+$log_{1/p}(n) + 1$.
+
+Putting everything together, let's denote the expected number of nodes visited to insert the node $X$ by $E[T(X)]$. Than,
+$E[T(X)] = E[S(log_p(n) + 1)] = (log_p(n) + 1) / p$
+Since we assumed that each list has infinitely many elements on the left, then the real expected time must be smaller than the one above.
+For large inputs, this is significantly better than a linear time offered by the linked list.
+
+# Search and deletion
+This is not everything that the skip list has to offer. Other operations, namely search and deletion, also have a similar average time which is, in all cases, better than the linked list.
+It is worth noting that in worst cases all of those operations are linear and only achieve the logarithmic time on average. In practise, this is good enough!
+
+# Conclusion
+We have just seen how probability can help us to create more efficient data structures. With a bit of additional memory, we were able to create a data structure that is, on average, much faster than a linked list. Probability is a powerful tool and helps us in many areas of science and engineering. A skip list is just one of many examples.
+
+References:
+1. https://en.wikipedia.org/wiki/Skip_list
+2. https://www.math.umd.edu/~immortal/CMSC420/notes/skiplists.pdf
+3. http://ccf.ee.ntu.edu.tw/~yen/courses/ds20F/chapter-sl.pdf

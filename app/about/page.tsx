@@ -16,7 +16,7 @@ export default function Page() {
     <>
       <AuthorLayout content={mainContent}>
         <MDXLayoutRenderer code={author.body.code} />
-        <a href="/static/pdfs/jCabalaCV.pdf">
+        <a href="/static/pdfs/CV.pdf">
           <button className="rounded bg-primary-600 px-2 py-2 text-gray-100">Resume</button>
         </a>
       </AuthorLayout>
