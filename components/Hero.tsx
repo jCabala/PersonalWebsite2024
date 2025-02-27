@@ -2,18 +2,14 @@ import React from 'react'
 
 const Hero = () => {
   return (
-    <div className="container mx-auto flex flex-col items-center justify-center px-5 py-12 md:flex-col md:py-24 lg:flex-row">
-      <img
-        className="mb-10 w-5/6 object-cover object-center md:w-3/6 lg:w-4/6"
-        alt="hero"
-        src="/static/images/hero/hero.png"
-      />
-      <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-gray-700 dark:text-gray-200 sm:text-4xl sm:leading-10 md:text-4xl lg:text-6xl">
-          Hello, welcome to my blog!
+    <section className="px-6 py-24 text-center md:px-12 md:py-32">
+      <div className="container mx-auto max-w-4xl">
+        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
+          Explore the beauty of <span className="text-primary-500">mathematics</span> and the power
+          of <span className="text-primary-500">computing</span>
         </h1>
       </div>
-    </div>
+    </section>
   )
 }
 
